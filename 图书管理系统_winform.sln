@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chapter12_winform", "Chapter12_winform\Chapter12_winform.csproj", "{11239970-B9E4-4F76-A3CD-E0EF40C409BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11239970-B9E4-4F76-A3CD-E0EF40C409BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11239970-B9E4-4F76-A3CD-E0EF40C409BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11239970-B9E4-4F76-A3CD-E0EF40C409BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11239970-B9E4-4F76-A3CD-E0EF40C409BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
