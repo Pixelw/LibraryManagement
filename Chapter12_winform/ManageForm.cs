@@ -3,17 +3,21 @@ using Chapter12_winform.model;
 using Chapter12_winform.utils;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Chapter12_winform {
-    public partial class ManageForm : Form {
+    public partial class ManageForm<T> : Form {
+
+        private readonly Type _type;
         public const int TypeBook = 1;
         public const int TypeUser = 2;
         public const int TypeAdmin = 3;
 
-        private readonly int type;
-        private BaseDao dao;
+        private readonly int manageType;
+        private BaseDao<T> dao;
         private List<Book> _books;
         private List<User> _users;
         private List<Admin> _admins;
@@ -26,9 +30,10 @@ namespace Chapter12_winform {
         public event SetUserDelegate SelectUser;
 
 
-        public ManageForm(int manageType) {
-            InitializeComponent();
-            type = manageType;
+        public ManageForm(int manageType, Type type) {
+            _type = type;
+            InitializeComponent(); 
+            this.manageType = manageType;
         }
 
         private void ManageForm_Shown(object sender, EventArgs e) {
@@ -47,6 +52,7 @@ namespace Chapter12_winform {
 
             listView1.Items.Clear();
             if (dao is BookDao bookDao) {
+                _books = new List<Book>();
                 _books = bookDao.GetAllBooks();
                 foreach (Book book in _books) {
                     var item = NewBookLvi(book);
@@ -97,14 +103,14 @@ namespace Chapter12_winform {
         private void SetupColumn() {
             var cs = listView1.Columns;
             cs.Clear();
-            switch (type) {
+            switch (manageType) {
                 case TypeBook:
                     cs.Add(HeaderBuilder.Build("ID", 40));
                     cs.Add(HeaderBuilder.Build("书名", 200));
                     cs.Add(HeaderBuilder.Build("作者", 100));
                     cs.Add(HeaderBuilder.Build("出版社", 100));
                     cs.Add(HeaderBuilder.Build("数量", 50));
-                    dao = new BookDao(Program.SqlHelper);
+                    dao= new BookDao<T>(Program.SqlHelper);
                     break;
                 case TypeUser:
                     cs.Add(HeaderBuilder.Build("ID", 100));
@@ -124,11 +130,11 @@ namespace Chapter12_winform {
             if (listView1.SelectedItems.Count > 0) {
                 toolStripButton2.Enabled = true;
                 toolStripButton3.Enabled = true;
-                if (type == TypeBook && SelectBook != null) {
+                if (manageType == TypeBook && SelectBook != null) {
                     SelectBook(_books[listView1.SelectedIndices[0]]);
                 }
 
-                if (type == TypeUser && SelectUser != null) {
+                if (manageType == TypeUser && SelectUser != null) {
                     SelectUser(_users[listView1.SelectedIndices[0]]);
                 }
             }
@@ -140,23 +146,23 @@ namespace Chapter12_winform {
 
         //add
         private void toolStripButton1_Click(object sender, EventArgs e) {
-            var add = new ModifyForm(ModifyForm.ModeAdd, type, dao, () => { LoadData(); });
+            var add = new ModifyForm(ModifyForm.ModeAdd, manageType, dao, () => { LoadData(); });
 
             add.Show();
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e) {
-            var modify = new ModifyForm(ModifyForm.ModeModify, type, dao, () => { LoadData(); });
+            var modify = new ModifyForm(ModifyForm.ModeModify, manageType, dao, () => { LoadData(); });
             modify.Show();
-            if (type == TypeAdmin) {
+            if (manageType == TypeAdmin) {
                 var admin = _admins[listView1.SelectedIndices[0]];
                 modify.SetData(admin.name, admin.pwd, admin.role.ToString(), "", "");
             }
-            else if (type == TypeBook) {
+            else if (manageType == TypeBook) {
                 var book = _books[listView1.SelectedIndices[0]];
                 modify.SetData(book.Bid, book.Bname, book.Author, book.Bpress, book.Quantity.ToString());
             }
-            else if (type == TypeUser) {
+            else if (manageType == TypeUser) {
                 var user = _users[listView1.SelectedIndices[0]];
                 modify.SetData(user.Uid, user.Uname, user.Count.ToString(), "", "");
             }
@@ -218,6 +224,10 @@ namespace Chapter12_winform {
                          || i.ToString().Contains(toolStripTextBox1.Text)
                 ).Select(c => NewUserLvi(c)).ToArray());
             }
+        }
+
+        private void toolStripButton4_Click(object sender, EventArgs e) {
+            
         }
     }
 }

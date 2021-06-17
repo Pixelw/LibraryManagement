@@ -88,6 +88,7 @@
       <DependentUpon>ManageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="model\Captcha.cs" />
+    <Compile Include="model\ITypes.cs" />
     <Compile Include="ModifyForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -131,6 +132,7 @@
     </Compile>
     <Compile Include="utils\CaptchaGenerator.cs" />
     <Compile Include="utils\HeaderBuilder.cs" />
+    <Compile Include="utils\PrintHelper.cs" />
     <Compile Include="utils\SQLHelper.cs" />
     <Compile Include="utils\TimeUtils.cs" />
     <EmbeddedResource Include="ManageForm.resx">

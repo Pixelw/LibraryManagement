@@ -76,7 +76,7 @@ namespace Chapter12_winform {
                 returnDate = TimeUtils.ToMillis(DateTime.Now.AddDays((double) numericUpDown1.Value));
             }
 
-            var ok = _borrowDao.BorrowABook(new Borrow(
+            var ok = _borrowDao.Add(new Borrow(
                 _selectBook.Bid,
                 _selectUser.Uid,
                 now,
@@ -132,7 +132,7 @@ namespace Chapter12_winform {
         private void toolStripButton3_Click(object sender, EventArgs e) {
             var ok = MessageBox.Show("删除这个记录?", "确认", MessageBoxButtons.OKCancel);
             if (ok == DialogResult.OK) {
-                var success = _borrowDao.DeleteBorrow(dataGridView1.SelectedRows[0].Cells[0].Value.ToString());
+                var success = _borrowDao.Delete(dataGridView1.SelectedRows[0].Cells[0].Value.ToString());
                 if (success) {
                     RefreshSheet();
                 }

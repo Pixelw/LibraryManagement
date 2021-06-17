@@ -18,10 +18,7 @@ namespace Chapter12_winform.utils {
         }
 
         public void Open() {
-            Task task = new Task(() => {
-                connection.Open();
-            });
-            
+            connection.Open();
         }
 
         public void Close() {
@@ -79,7 +76,7 @@ namespace Chapter12_winform.utils {
             return table;
         }
 
-        public DataTable ExecuteTable(string sqlStr,  params SqlParameter[] parameters) {
+        public DataTable ExecuteTable(string sqlStr, params SqlParameter[] parameters) {
             SqlCommand command = connection.CreateCommand();
             command.CommandText = sqlStr;
             command.Parameters.AddRange(parameters);

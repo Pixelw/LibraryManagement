@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Chapter12_winform.model {
-    public class Book {
+    public class Book: ITypes{
         public String Bid { set; get; }
 
         public String Bname { set; get; }

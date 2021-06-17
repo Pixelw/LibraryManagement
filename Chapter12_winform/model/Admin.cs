@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Chapter12_winform.model {
-    public class Admin {
+    public class Admin: ITypes{
         public String name { get; set; }
 
         public String pwd { get; set; }
