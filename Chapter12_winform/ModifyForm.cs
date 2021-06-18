@@ -34,47 +34,32 @@ namespace Chapter12_winform {
                 label6.ForeColor = Color.Red;
                 return;
             }
+
             bool success = false;
             try {
-                if (dao is BookDao bookDao) {
-                    var book = new Book();
-                    book.Bid = textBox1.Text.Trim();
-                    book.Bname = textBox2.Text;
-                    book.Author = textBox3.Text;
-                    book.Bpress = textBox4.Text;
-                    book.Quantity = int.Parse(textBox5.Text.Trim());
-                    if (mode == ModeAdd) {
-                        success = bookDao.AddBook(book);
-                    }
-                    else {
-                        success = bookDao.UpdateBook(book);
-                    }
+                Models entity = null;
+                if (dao is BookDao) {
+                    entity = new Book(textBox1.Text.Trim(), textBox2.Text, textBox3.Text, textBox4.Text,
+                        int.Parse(textBox5.Text.Trim()));
                 }
 
-                if (dao is UserDao userDao) {
-                    var user = new User();
-                    user.Uid = textBox1.Text.Trim();
-                    user.Uname = textBox2.Text;
-                    if (mode == ModeAdd) {
-                        success = userDao.AddNewUser(user);
-                    }
-                    else {
-                        success = userDao.UpdateUser(user);
-                    }
+                if (dao is UserDao) {
+                    entity = new User(textBox1.Text.Trim(), textBox2.Text, 0);
                 }
 
-                if (dao is AdminDao adminDao) {
-                    var admin = new Admin(
+                if (dao is AdminDao) {
+                    entity = new Admin(
                         textBox1.Text.Trim(),
                         textBox2.Text.Trim(),
                         int.Parse(comboBox1.SelectedValue.ToString())
                     );
-                    if (mode == ModeAdd) {
-                        success = adminDao.AddNewAdmin(admin);
-                    }
-                    else {
-                        success = adminDao.UpdateAdmin(admin);
-                    }
+                }
+
+                if (mode == ModeAdd) {
+                    success = dao.Add(entity);
+                }
+                else {
+                    success = dao.Update(entity);
                 }
 
                 if (success) {
@@ -92,6 +77,7 @@ namespace Chapter12_winform {
             if (type == ManageForm.TypeAdmin) {
                 comboBox1.SelectedValue = int.Parse(t3);
             }
+
             textBox1.Text = t1;
             textBox2.Text = t2;
             textBox3.Text = t3;
@@ -120,7 +106,7 @@ namespace Chapter12_winform {
                     labelTitle.Text = "用户";
                     label1.Text = "ID/身份证";
                     label2.Text = "名字";
-                    
+
                     label3.Visible = false;
                     textBox3.Visible = false;
                     label4.Visible = false;

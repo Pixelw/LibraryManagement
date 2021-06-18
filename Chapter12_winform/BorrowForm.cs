@@ -30,9 +30,16 @@ namespace Chapter12_winform {
         }
 
 
-        public void SetBook(Book book) {
-            _selectBook = book;
-            label2.Text = book.Bid + "\n" + book.Bname;
+        public void SetBorrowInfo(Models models) {
+            if (models is Book book) {
+                _selectBook = book;
+                label2.Text = book.Bid + "\n" + book.Bname;
+            }
+            else if (models is User user) {
+                _selectUser = user;
+                label3.Text = user.Uid + '\n' + user.Uname;
+            }
+
             SetPrompt();
         }
 
@@ -57,13 +64,6 @@ namespace Chapter12_winform {
                 label5.ForeColor = Color.MediumSeaGreen;
             }
         }
-
-        public void SetUser(User user) {
-            _selectUser = user;
-            label3.Text = user.Uid + '\n' + user.Uname;
-            SetPrompt();
-        }
-
 
         private void button1_Click(object sender, EventArgs e) {
             if (_selectBook == null || _selectUser == null) return;
@@ -149,7 +149,8 @@ namespace Chapter12_winform {
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e) {
-            string rowFilter = string.Format("[{1}] LIKE '%{0}%' OR [{2}] LIKE '%{0}%'", toolStripTextBox1.Text, "用户", "书籍");
+            string rowFilter = string.Format("[{1}] LIKE '%{0}%' OR [{2}] LIKE '%{0}%'", toolStripTextBox1.Text, "用户",
+                "书籍");
             ((DataTable) dataGridView1.DataSource).DefaultView.RowFilter = rowFilter;
             dataGridView1.Refresh();
         }

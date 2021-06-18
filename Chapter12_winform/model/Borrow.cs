@@ -1,8 +1,18 @@
 ﻿using System;
 
 namespace Chapter12_winform.model {
-    public class Borrow {
-        public string Bid { get; set; }
+    public class Borrow: Models {
+        private string _bid;
+
+        public string Bid {
+            get {
+                return _bid;
+            }
+            set {
+                _bid = value;
+                id = value;
+            }
+        }
 
         public string Uid { get; set; }
 

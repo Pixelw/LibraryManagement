@@ -6,7 +6,7 @@ using Chapter12_winform.model;
 using Chapter12_winform.utils;
 
 namespace Chapter12_winform.dao {
-    public class BookDao<T> : BaseDao<T> {
+    public class BookDao : BaseDao {
         public BookDao(SqlHelper sqlHelper) : base(sqlHelper) { }
 
         public Book GetBook(String bid) {
@@ -25,7 +25,7 @@ namespace Chapter12_winform.dao {
             return book;
         }
 
-        public override bool Add(T obj) {
+        public override bool Add(Models obj) {
             if (obj is Book book) {
                 int i = sqlHelper.ExecuteNonQuery(
                     "insert into T_book values (@BID, @BNAME, @PRESS, @AUTHOR, @Q)",
@@ -39,25 +39,28 @@ namespace Chapter12_winform.dao {
             return IllegalArgs();
         }
 
-
         public override bool Delete(string id) {
             int i = sqlHelper.ExecuteNonQuery("delete from T_book where Bid=@BID",
                 new SqlParameter("@BID", id));
             return i > 0;
         }
 
+        public override bool Update(Models obj) {
+            if (obj is Book book) {
+                int i = sqlHelper.ExecuteNonQuery(
+                    "update T_book set Bname=@BNAME, Bpress=@PRESS, Author=@AUTHOR, Quantity=@Q where Bid=@BID",
+                    new SqlParameter("@BNAME", book.Bname), new SqlParameter("@PRESS", book.Bpress),
+                    new SqlParameter("@AUTHOR", book.Author), new SqlParameter("@BID", book.Bid),
+                    new SqlParameter("@Q", book.Quantity));
+                return i > 0;
+            }
 
-        public override bool Update(Book obj) {
-            int i = sqlHelper.ExecuteNonQuery(
-                "update T_book set Bname=@BNAME, Bpress=@PRESS, Author=@AUTHOR, Quantity=@Q where Bid=@BID",
-                new SqlParameter("@BNAME", obj.Bname), new SqlParameter("@PRESS", obj.Bpress),
-                new SqlParameter("@AUTHOR", obj.Author), new SqlParameter("@BID", obj.Bid),
-                new SqlParameter("@Q", obj.Quantity));
-            return i > 0;
+            return IllegalArgs();
         }
+        
 
-        public override List<Book> GetAll() {
-            List<Book> books = new List<Book>();
+        public override List<Models> GetAll() {
+            List<Models> books = new List<Models>();
             DataTable dataTable = sqlHelper.ExecuteTable("select * from T_book");
             for (int i = 0; i < dataTable.Rows.Count; i++) {
                 Book book = new Book();
@@ -69,9 +72,9 @@ namespace Chapter12_winform.dao {
                 books.Add(book);
             }
 
-            PrintHelper printHelper = new PrintHelper();
-            printHelper.Titles = new string[] {"标题"};
-            printHelper.PrintDataTable(dataTable);
+            // PrintHelper printHelper = new PrintHelper();
+            // printHelper.Titles = new string[] {"标题"};
+            // printHelper.PrintDataTable(dataTable);
             return books;
         }
 

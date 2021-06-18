@@ -3,36 +3,28 @@ using Chapter12_winform.model;
 using Chapter12_winform.utils;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Chapter12_winform {
-    public partial class ManageForm<T> : Form {
-
-        private readonly Type _type;
+    public partial class ManageForm : Form {
         public const int TypeBook = 1;
         public const int TypeUser = 2;
         public const int TypeAdmin = 3;
 
         private readonly int manageType;
-        private BaseDao<T> dao;
-        private List<Book> _books;
-        private List<User> _users;
-        private List<Admin> _admins;
+        private BaseDao dao;
 
-        public delegate void SetBookDelegate(Book book);
+        private List<Models> _list;
 
-        public delegate void SetUserDelegate(User user);
-
-        public event SetBookDelegate SelectBook;
-        public event SetUserDelegate SelectUser;
+        public delegate void SelectorDelegate(Models models);
 
 
-        public ManageForm(int manageType, Type type) {
-            _type = type;
-            InitializeComponent(); 
+        public event SelectorDelegate Selector;
+
+
+        public ManageForm(int manageType) {
+            InitializeComponent();
             this.manageType = manageType;
         }
 
@@ -51,52 +43,33 @@ namespace Chapter12_winform {
             listView1.BeginUpdate();
 
             listView1.Items.Clear();
-            if (dao is BookDao bookDao) {
-                _books = new List<Book>();
-                _books = bookDao.GetAllBooks();
-                foreach (Book book in _books) {
-                    var item = NewBookLvi(book);
-                    listView1.Items.Add(item);
-                }
-            }
-            else if (dao is UserDao userDao) {
-                _users = userDao.GetAllUsers();
-                foreach (var user in _users) {
-                    listView1.Items.Add(NewUserLvi(user));
-                }
-            }
-            else if (dao is AdminDao adminDao) {
-                _admins = adminDao.GetAllAdmins();
-                foreach (var admin in _admins) {
-                    NewAdminLvi(admin);
-                }
+            _list = dao.GetAll();
+            foreach (var entity in _list) {
+                listView1.Items.Add(NewLvi(entity));
             }
 
             listView1.EndUpdate();
         }
 
-        private static ListViewItem NewBookLvi(Book book) {
+        private static ListViewItem NewLvi(Models models) {
             ListViewItem item = new ListViewItem();
-            item.Text = book.Bid;
-            item.SubItems.Add(book.Bname);
-            item.SubItems.Add(book.Author);
-            item.SubItems.Add(book.Bpress);
-            item.SubItems.Add(book.Quantity.ToString());
-            return item;
-        }
+            if (models is Book book) {
+                item.Text = book.Bid;
+                item.SubItems.Add(book.Bname);
+                item.SubItems.Add(book.Author);
+                item.SubItems.Add(book.Bpress);
+                item.SubItems.Add(book.Quantity.ToString());
+            }
+            else if (models is User user) {
+                item.Text = user.Uid;
+                item.SubItems.Add(user.Uname);
+            }
+            else if (models is Admin admin) {
+                item.Text = admin.Name;
+                item.SubItems.Add(string.IsNullOrEmpty(admin.pwd) ? "空" : "有");
+                item.SubItems.Add(Form1.RoleDict[admin.role]);
+            }
 
-        private ListViewItem NewUserLvi(User user) {
-            ListViewItem item = new ListViewItem();
-            item.Text = user.Uid;
-            item.SubItems.Add(user.Uname);
-            return item;
-        }
-
-        private ListViewItem NewAdminLvi(Admin admin) {
-            ListViewItem item = new ListViewItem();
-            item.Text = admin.name;
-            item.SubItems.Add(string.IsNullOrEmpty(admin.pwd) ? "空" : "有");
-            item.SubItems.Add(Form1.RoleDict[admin.role]);
             return item;
         }
 
@@ -110,7 +83,7 @@ namespace Chapter12_winform {
                     cs.Add(HeaderBuilder.Build("作者", 100));
                     cs.Add(HeaderBuilder.Build("出版社", 100));
                     cs.Add(HeaderBuilder.Build("数量", 50));
-                    dao= new BookDao<T>(Program.SqlHelper);
+                    dao = new BookDao(Program.SqlHelper);
                     break;
                 case TypeUser:
                     cs.Add(HeaderBuilder.Build("ID", 100));
@@ -130,13 +103,8 @@ namespace Chapter12_winform {
             if (listView1.SelectedItems.Count > 0) {
                 toolStripButton2.Enabled = true;
                 toolStripButton3.Enabled = true;
-                if (manageType == TypeBook && SelectBook != null) {
-                    SelectBook(_books[listView1.SelectedIndices[0]]);
-                }
-
-                if (manageType == TypeUser && SelectUser != null) {
-                    SelectUser(_users[listView1.SelectedIndices[0]]);
-                }
+                // 调用委托回调，到借书界面设置信息
+                Selector?.Invoke(_list[listView1.SelectedIndices[0]]);
             }
             else {
                 toolStripButton2.Enabled = false;
@@ -154,16 +122,13 @@ namespace Chapter12_winform {
         private void toolStripButton2_Click(object sender, EventArgs e) {
             var modify = new ModifyForm(ModifyForm.ModeModify, manageType, dao, () => { LoadData(); });
             modify.Show();
-            if (manageType == TypeAdmin) {
-                var admin = _admins[listView1.SelectedIndices[0]];
-                modify.SetData(admin.name, admin.pwd, admin.role.ToString(), "", "");
+            if (_list[listView1.SelectedIndices[0]] is Admin admin) {
+                modify.SetData(admin.Name, admin.pwd, admin.role.ToString(), "", "");
             }
-            else if (manageType == TypeBook) {
-                var book = _books[listView1.SelectedIndices[0]];
+            else if (_list[listView1.SelectedIndices[0]] is Book book) {
                 modify.SetData(book.Bid, book.Bname, book.Author, book.Bpress, book.Quantity.ToString());
             }
-            else if (manageType == TypeUser) {
-                var user = _users[listView1.SelectedIndices[0]];
+            else if (_list[listView1.SelectedIndices[0]] is User user) {
                 modify.SetData(user.Uid, user.Uname, user.Count.ToString(), "", "");
             }
         }
@@ -176,18 +141,7 @@ namespace Chapter12_winform {
                 return;
             }
 
-            bool ok = false;
-            if (dao is BookDao bookDao) {
-                ok = bookDao.DeleteBook(_books[listView1.SelectedIndices[0]].Bid);
-            }
-
-            if (dao is UserDao userDao) {
-                ok = userDao.DeleteUser(_users[listView1.SelectedIndices[0]]);
-            }
-
-            if (dao is AdminDao adminDao) {
-                ok = adminDao.DeleteAdmin(_admins[listView1.SelectedIndices[0]]);
-            }
+            bool ok = dao.Delete(_list[listView1.SelectedIndices[0]].id);
 
             if (ok) {
                 LoadData();
@@ -203,31 +157,29 @@ namespace Chapter12_winform {
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e) {
             if (dao is AdminDao) {
                 listView1.Items.Clear();
-                listView1.Items.AddRange(_admins.Where(
+                listView1.Items.AddRange(_list.Where(
                     i => string.IsNullOrEmpty(toolStripTextBox1.Text)
                          || i.ToString().Contains(toolStripTextBox1.Text)
-                ).Select(c => NewAdminLvi(c)).ToArray());
+                ).Select(c => NewLvi(c)).ToArray());
             }
 
             if (dao is BookDao) {
                 listView1.Items.Clear();
-                listView1.Items.AddRange(_books.Where(
+                listView1.Items.AddRange(_list.Where(
                     i => string.IsNullOrEmpty(toolStripTextBox1.Text)
                          || i.ToString().Contains(toolStripTextBox1.Text)
-                ).Select(c => NewBookLvi(c)).ToArray());
+                ).Select(c => NewLvi(c)).ToArray());
             }
 
             if (dao is UserDao) {
                 listView1.Items.Clear();
-                listView1.Items.AddRange(_users.Where(
+                listView1.Items.AddRange(_list.Where(
                     i => string.IsNullOrEmpty(toolStripTextBox1.Text)
                          || i.ToString().Contains(toolStripTextBox1.Text)
-                ).Select(c => NewUserLvi(c)).ToArray());
+                ).Select(c => NewLvi(c)).ToArray());
             }
         }
 
-        private void toolStripButton4_Click(object sender, EventArgs e) {
-            
-        }
+        private void toolStripButton4_Click(object sender, EventArgs e) { }
     }
 }

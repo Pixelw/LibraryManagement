@@ -88,7 +88,7 @@
       <DependentUpon>ManageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="model\Captcha.cs" />
-    <Compile Include="model\ITypes.cs" />
+    <Compile Include="model\Models.cs" />
     <Compile Include="ModifyForm.cs">
       <SubType>Form</SubType>
     </Compile>

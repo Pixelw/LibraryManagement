@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Chapter12_winform.model {
-    public class User {
+    public class User : Models {
         public User(string uid, string uname, int count) {
             Uid = uid;
             Uname = uname;
@@ -9,10 +9,18 @@ namespace Chapter12_winform.model {
         }
 
         public User() { }
-        public String Uid { set; get; }
+        private string _uid;
+
+        public String Uid {
+            set {
+                _uid = value;
+                id = value;
+            }
+            get { return _uid; }
+        }
 
         public String Uname { get; set; }
-        
+
         public int Count { get; set; }
 
         public override string ToString() {

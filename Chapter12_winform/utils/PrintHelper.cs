@@ -85,7 +85,7 @@ namespace Chapter12_winform.utils {
                 prtDocument.Print();
             }
             catch (InvalidPrinterException ex) {
-                MessageBox.Show("没有安装打印机");
+                MessageBox.Show("没有安装打印机\n" + ex.Message);
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);

@@ -84,8 +84,8 @@ namespace Chapter12_winform {
             _borrowForm = new BorrowForm();
             _borrowForm.MdiParent = this;
             // 设置右侧点击事件， 使用delegate event 传递到左侧
-            right.Book.SelectBook += _borrowForm.SetBook;
-            right.User.SelectUser += _borrowForm.SetUser;
+            right.Book.Selector += _borrowForm.SetBorrowInfo;
+            right.User.Selector += _borrowForm.SetBorrowInfo;
             _borrowForm.Show();
 
             LayoutMdi(MdiLayout.TileVertical);

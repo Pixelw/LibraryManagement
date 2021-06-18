@@ -6,7 +6,7 @@ using Chapter12_winform.model;
 using Chapter12_winform.utils;
 
 namespace Chapter12_winform.dao {
-    public class UserDao : BaseDao<User> {
+    public class UserDao : BaseDao {
         public UserDao(SqlHelper sqlHelper) : base(sqlHelper) { }
 
         public User GetUser(String uid) {
@@ -22,12 +22,16 @@ namespace Chapter12_winform.dao {
                 return user;
             }
         }
+        
+        public override bool Add(Models obj) {
+            if (obj is User user) {
+                int i = sqlHelper.ExecuteNonQuery("insert into T_user values (@UID, @NAME,0)",
+                    new SqlParameter("@UID", user.Uid),
+                    new SqlParameter("@NAME", user.Uname));
+                return i > 0;
+            }
 
-        public override bool Add(User user) {
-            int i = sqlHelper.ExecuteNonQuery("insert into T_user values (@UID, @NAME,0)",
-                new SqlParameter("@UID", user.Uid),
-                new SqlParameter("@NAME", user.Uname));
-            return i > 0;
+            return IllegalArgs();
         }
 
         public override bool Delete(string id) {
@@ -36,16 +40,21 @@ namespace Chapter12_winform.dao {
             return i > 0;
         }
 
-        public override bool Update(User user) {
-            int i = sqlHelper.ExecuteNonQuery("update T_user set Uname=@NAME, count=@C where Uid=@UID",
-                new SqlParameter("@NAME", user.Uname),
-                new SqlParameter("@UID", user.Uid),
-                new SqlParameter("@C", user.Count));
-            return i > 0;
-        }
+        public override bool Update(Models obj) {
+            if (obj is User user) {
+                int i = sqlHelper.ExecuteNonQuery("update T_user set Uname=@NAME, count=@C where Uid=@UID",
+                    new SqlParameter("@NAME", user.Uname),
+                    new SqlParameter("@UID", user.Uid),
+                    new SqlParameter("@C", user.Count));
+                return i > 0;
+            }
 
-        public override List<User> GetAll() {
-            var users = new List<User>();
+            return IllegalArgs();
+        }
+        
+
+        public override List<Models> GetAll() {
+            var users = new List<Models>();
             DataTable dataTable = sqlHelper.ExecuteTable("select * from T_user");
             foreach (DataRow row in dataTable.Rows) {
                 int c = string.IsNullOrEmpty(row[2].ToString().Trim()) ? 0 : int.Parse(row[2].ToString().Trim());
@@ -54,7 +63,6 @@ namespace Chapter12_winform.dao {
                     c
                 ));
             }
-
             return users;
         }
 

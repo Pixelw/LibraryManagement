@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Chapter12_winform.model;
 using Chapter12_winform.utils;
 
 namespace Chapter12_winform.dao {
     
-    public abstract class BaseDao<T> {
+    public abstract class BaseDao {
         protected SqlHelper sqlHelper;
         public BaseDao(SqlHelper sqlHelper) {
             this.sqlHelper = sqlHelper;
@@ -18,13 +19,13 @@ namespace Chapter12_winform.dao {
             sqlHelper.Close();
         }
 
-        public abstract bool Add(T obj);
+        public abstract bool Add(Models obj);
 
         public abstract bool Delete(string id);
 
-        public abstract bool Update(T obj);
+        public abstract bool Update(Models obj);
 
-        public abstract List<T> GetAll();
+        public abstract List<Models> GetAll();
 
         public abstract DataTable GetDataTable();
 
