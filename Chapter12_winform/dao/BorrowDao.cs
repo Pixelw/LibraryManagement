@@ -32,8 +32,8 @@ namespace Chapter12_winform.dao {
 
         public SqlDataAdapter GetAllSda() {
             return new SqlDataAdapter(
-                "select B.id as ID, O.Bname as 书籍,U.Uname as 用户, B.date as 借阅日期, B.onBorrow as 正在借阅, B.returnDate as 预定归还日期 from T_Borrow B join T_book O on B.Bid collate Chinese_PRC_90_CI_AI_KS_SC_UTF8= O.Bid collate Chinese_PRC_90_CI_AI_KS_SC_UTF8 join T_user U on B.Uid collate  Chinese_PRC_90_CI_AI_KS_SC_UTF8= U.Uid collate Chinese_PRC_90_CI_AI_KS_SC_UTF8",
-                sqlHelper.connection);
+                "select B.id as ID, O.Bid as 书籍ID ,O.Bname as 书籍,U.Uname as 用户, B.date as 借阅日期, B.onBorrow as 正在借阅, B.returnDate as 预定归还日期 from T_Borrow B join T_book O on B.Bid collate Chinese_PRC_90_CI_AI_KS_SC_UTF8= O.Bid collate Chinese_PRC_90_CI_AI_KS_SC_UTF8 join T_user U on B.Uid collate  Chinese_PRC_90_CI_AI_KS_SC_UTF8= U.Uid collate Chinese_PRC_90_CI_AI_KS_SC_UTF8",
+                sqlHelper.Connection);
         }
 
 

@@ -10,15 +10,8 @@ namespace Chapter12_winform.dao {
         protected SqlHelper sqlHelper;
         public BaseDao(SqlHelper sqlHelper) {
             this.sqlHelper = sqlHelper;
-            if(sqlHelper.connection.State != ConnectionState.Open) {
-                sqlHelper.Open();
-            }
         }
         
-        public void CloseConnection() {
-            sqlHelper.Close();
-        }
-
         public abstract bool Add(Models obj);
 
         public abstract bool Delete(string id);

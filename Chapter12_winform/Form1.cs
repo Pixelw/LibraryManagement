@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace Chapter12_winform {
@@ -25,14 +27,22 @@ namespace Chapter12_winform {
         private ManageForm _userManage;
         private ManageForm _adminManage;
 
-
         private void Form1_Load(object sender, EventArgs e) {
             IsMdiContainer = true;
             Logout();
             loginForm = new LoginForm(this);
             loginForm.StartPosition = FormStartPosition.CenterParent;
             loginForm.TopMost = true;
+            // Program.SqlHelper.SetStateText += SetSqlState;
             Console.WriteLine("Form1_load");
+        }
+
+        private void SetSqlState(string text) {
+            if (string.IsNullOrWhiteSpace(text)) {
+                toolStripStatusLabel1.Text = "就绪";
+            }
+            else
+                toolStripStatusLabel1.Text = text;
         }
 
         private void Form1_Shown(object sender, EventArgs e) {
@@ -42,6 +52,7 @@ namespace Chapter12_winform {
         public void LoginSetRole(int role) {
             Text += "：" + RoleDict[role];
             toolStripStatusLabel1.Text = Text;
+            menuStrip1.Enabled = true;
             switch (role) {
                 case RoleOperator:
                     toolStrip1.Visible = true;
@@ -57,11 +68,13 @@ namespace Chapter12_winform {
                     MessageBox.Show("未知角色" + role, "错误");
                     break;
             }
+            WindowState = FormWindowState.Maximized;
         }
 
         private void Logout() {
             toolStrip1.Visible = false;
             toolStrip2.Visible = false;
+            menuStrip1.Enabled = false;
         }
 
         private void Borrow_Click(object sender, EventArgs e) {
@@ -83,9 +96,12 @@ namespace Chapter12_winform {
 
             _borrowForm = new BorrowForm();
             _borrowForm.MdiParent = this;
-            // 设置右侧点击事件， 使用delegate event 传递到左侧
+            // 设置右侧点击事件， 使用delegate event 传递到左侧f  
             right.Book.Selector += _borrowForm.SetBorrowInfo;
             right.User.Selector += _borrowForm.SetBorrowInfo;
+            // 左侧成功操作以后刷新右侧两个窗口
+            _borrowForm.RefreshDelegate += right.Book.LoadData;
+            _borrowForm.RefreshDelegate += right.User.LoadData;
             _borrowForm.Show();
 
             LayoutMdi(MdiLayout.TileVertical);
@@ -123,15 +139,36 @@ namespace Chapter12_winform {
         }
 
         private void 借书和还书BToolStripMenuItem_Click(object sender, EventArgs e) {
-            toolStripButton1_Click(sender, e);
+            Borrow_Click(sender, e);
         }
 
         private void timer1_Tick(object sender, EventArgs e) {
-            toolStripStatusLabel3.Text = DateTime.Now.ToString();
+            toolStripStatusLabel3.Text = DateTime.Now.ToString(CultureInfo.CurrentCulture);
         }
 
         private void toolStripButton4_Click(object sender, EventArgs e) {
+            new ServerForm().Show();
+        }
 
+        private void 书库管理ToolStripMenuItem_Click(object sender, EventArgs e) {
+            toolStripButton1_Click(sender, e);
+        }
+
+        private void 读者管理ToolStripMenuItem_Click(object sender, EventArgs e) {
+            toolStripButton2_Click(sender, e);
+        }
+
+        private void 项目主页ToolStripMenuItem_Click(object sender, EventArgs e) {
+            Process.Start("https://github.com/Pixelw/LibraryManagement");
+        }
+
+        private void 关于ToolStripMenuItem_Click(object sender, EventArgs e) {
+            AboutForm aboutForm = new AboutForm();
+            aboutForm.Show();
+        }
+
+        private void 退出ToolStripMenuItem_Click(object sender, EventArgs e) {
+            Program.Quit(e);
         }
     }
 }

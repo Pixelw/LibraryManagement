@@ -81,6 +81,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutForm.Designer.cs">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ManageForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -130,11 +136,21 @@
     <Compile Include="RightContainerForm.Designer.cs">
       <DependentUpon>RightContainerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ServerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ServerForm.Designer.cs">
+      <DependentUpon>ServerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="utils\CaptchaGenerator.cs" />
+    <Compile Include="utils\ExcelUtils.cs" />
     <Compile Include="utils\HeaderBuilder.cs" />
     <Compile Include="utils\PrintHelper.cs" />
     <Compile Include="utils\SQLHelper.cs" />
     <Compile Include="utils\TimeUtils.cs" />
+    <EmbeddedResource Include="AboutForm.resx">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ManageForm.resx">
       <DependentUpon>ManageForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -162,6 +178,9 @@
     </Compile>
     <EmbeddedResource Include="RightContainerForm.resx">
       <DependentUpon>RightContainerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ServerForm.resx">
+      <DependentUpon>ServerForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Chapter12_winform_TemporaryKey.pfx" />

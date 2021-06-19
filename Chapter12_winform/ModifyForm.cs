@@ -96,8 +96,8 @@ namespace Chapter12_winform {
                     labelTitle.Text = "图书";
                     label1.Text = "ID/ISBN";
                     label2.Text = "书名";
-                    label3.Text = "作者";
-                    label4.Text = "出版社";
+                    label3.Text = "出版社";
+                    label4.Text = "作者";
                     label5.Text = "数量";
                     label5.Visible = true;
                     textBox5.Visible = true;

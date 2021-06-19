@@ -19,9 +19,7 @@ namespace Chapter12_winform {
 
         public delegate void SelectorDelegate(Models models);
 
-
         public event SelectorDelegate Selector;
-
 
         public ManageForm(int manageType) {
             InitializeComponent();
@@ -39,7 +37,7 @@ namespace Chapter12_winform {
             LoadData();
         }
 
-        internal void LoadData() {
+        public void LoadData() {
             listView1.BeginUpdate();
 
             listView1.Items.Clear();
@@ -78,6 +76,7 @@ namespace Chapter12_winform {
             cs.Clear();
             switch (manageType) {
                 case TypeBook:
+                    Text = "书库管理";
                     cs.Add(HeaderBuilder.Build("ID", 40));
                     cs.Add(HeaderBuilder.Build("书名", 200));
                     cs.Add(HeaderBuilder.Build("作者", 100));
@@ -86,14 +85,16 @@ namespace Chapter12_winform {
                     dao = new BookDao(Program.SqlHelper);
                     break;
                 case TypeUser:
+                    Text = "用户管理";
                     cs.Add(HeaderBuilder.Build("ID", 100));
                     cs.Add(HeaderBuilder.Build("姓名", 100));
                     dao = new UserDao(Program.SqlHelper);
                     break;
                 case TypeAdmin:
+                    Text = "操作员管理";
                     cs.Add(HeaderBuilder.Build("用户名", 150));
                     cs.Add(HeaderBuilder.Build("密码", 50));
-                    cs.Add(HeaderBuilder.Build("角色", 50));
+                    cs.Add(HeaderBuilder.Build("角色", 200));
                     dao = new AdminDao(Program.SqlHelper);
                     break;
             }
@@ -115,7 +116,6 @@ namespace Chapter12_winform {
         //add
         private void toolStripButton1_Click(object sender, EventArgs e) {
             var add = new ModifyForm(ModifyForm.ModeAdd, manageType, dao, () => { LoadData(); });
-
             add.Show();
         }
 
@@ -155,31 +155,22 @@ namespace Chapter12_winform {
         }
 
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e) {
-            if (dao is AdminDao) {
-                listView1.Items.Clear();
-                listView1.Items.AddRange(_list.Where(
-                    i => string.IsNullOrEmpty(toolStripTextBox1.Text)
-                         || i.ToString().Contains(toolStripTextBox1.Text)
-                ).Select(c => NewLvi(c)).ToArray());
-            }
-
-            if (dao is BookDao) {
-                listView1.Items.Clear();
-                listView1.Items.AddRange(_list.Where(
-                    i => string.IsNullOrEmpty(toolStripTextBox1.Text)
-                         || i.ToString().Contains(toolStripTextBox1.Text)
-                ).Select(c => NewLvi(c)).ToArray());
-            }
-
-            if (dao is UserDao) {
-                listView1.Items.Clear();
-                listView1.Items.AddRange(_list.Where(
-                    i => string.IsNullOrEmpty(toolStripTextBox1.Text)
-                         || i.ToString().Contains(toolStripTextBox1.Text)
-                ).Select(c => NewLvi(c)).ToArray());
-            }
+            listView1.Items.Clear();
+            listView1.Items.AddRange(_list.Where(
+                i => string.IsNullOrEmpty(toolStripTextBox1.Text)
+                     || i.ToString().Contains(toolStripTextBox1.Text)
+            ).Select(c => NewLvi(c)).ToArray());
         }
 
-        private void toolStripButton4_Click(object sender, EventArgs e) { }
+        private void toolStripButton4_Click(object sender, EventArgs e) {
+            PrintHelper printHelper = new PrintHelper();
+            printHelper.Titles = new[] {Text};
+            printHelper.PrintDataTable(dao.GetDataTable());
+        }
+
+        private void toolStripButton5_Click(object sender, EventArgs e) {
+            ExcelUtils.ExportToExcel(dao.GetDataTable(),
+                Text + DateTime.Now.ToString("yyyy-M-d hh-mm-ss") + ".csv", true);
+        }
     }
 }

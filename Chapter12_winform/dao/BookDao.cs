@@ -24,6 +24,7 @@ namespace Chapter12_winform.dao {
             book.Quantity = int.Parse(dataTable.Rows[0][4].ToString().Trim());
             return book;
         }
+        
 
         public override bool Add(Models obj) {
             if (obj is Book book) {
@@ -72,9 +73,6 @@ namespace Chapter12_winform.dao {
                 books.Add(book);
             }
 
-            // PrintHelper printHelper = new PrintHelper();
-            // printHelper.Titles = new string[] {"标题"};
-            // printHelper.PrintDataTable(dataTable);
             return books;
         }
 

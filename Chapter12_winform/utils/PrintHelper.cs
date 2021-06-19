@@ -9,8 +9,9 @@ namespace Chapter12_winform.utils {
         #region Members //成员
 
         public String printName = String.Empty;
-        public Font prtTextFont = new Font("Verdana", 10);
-        public Font prtTitleFont = new Font("宋体", 10);
+        public Font prtDataFont = new Font("Arial", 10);
+        public Font prtTitleFont = new Font("微软雅黑", 23, FontStyle.Bold);
+        public Font prtColumnHeaderFont = new Font("Arial", 10, FontStyle.Bold);
         private String[] titles = new String[0];
 
         public String[] Titles {
@@ -23,17 +24,17 @@ namespace Chapter12_winform.utils {
             get { return titles; }
         }
 
-        private Int32 left = 20;
-        private Int32 top = 20;
+        private Int32 leftMargin = 0;
+        private Int32 topMargin = 0;
 
-        public Int32 Top {
-            set { top = value; }
-            get { return top; }
+        public Int32 TopMargin {
+            set { topMargin = value; }
+            get { return topMargin; }
         }
 
-        public Int32 Left {
-            set { left = value; }
-            get { return left; }
+        public Int32 LeftMargin {
+            set { leftMargin = value; }
+            get { return leftMargin; }
         }
 
         private DataTable printedTable;
@@ -43,7 +44,8 @@ namespace Chapter12_winform.utils {
         private Int32 curdgi;
         private Int32[] width;
         private Int32 rowOfDownDistance = 3;
-        private Int32 rowOfUpDistance = 2;
+        private Int32 rowOfUpDistance = 3;
+        private Int32 gapBetweenContentAndTitle = 50;
 
         Int32 startColumnControls = 0;
         Int32 endColumnControls = 0;
@@ -64,8 +66,8 @@ namespace Chapter12_winform.utils {
                     prtDocument.PrinterSettings.PrinterName = printName;
                 }
 
-                prtDocument.DefaultPageSettings.Landscape = true;
-                prtDocument.OriginAtMargins = false;
+                prtDocument.DefaultPageSettings.Landscape = false;
+                prtDocument.OriginAtMargins = true;
                 PrintDialog prtDialog = new PrintDialog();
                 prtDialog.AllowSomePages = true;
                 prtDialog.ShowHelp = false;
@@ -106,46 +108,56 @@ namespace Chapter12_winform.utils {
         /// <param name="ev"></param>
         private void docToPrint_PrintPage(object sender, PrintPageEventArgs ev) //设置打印机开始打印的事件处理函数
         {
-            Int32 x = left;
-            Int32 y = top;
-            Int32 rowOfTop = top;
+            Int32 x = leftMargin;
+            Int32 y = topMargin;
             Int32 i;
             Pen pen = new Pen(Brushes.Black, 1);
             if (0 == pindex) {
+                // 画标题
                 for (i = 0; i < titles.Length; i++) {
-                    ev.Graphics.DrawString(titles[i], prtTitleFont, Brushes.Black, left, y + rowOfUpDistance);
-                    y += prtTextFont.Height + rowOfDownDistance;
+                    y += rowOfUpDistance;
+                    ev.Graphics.DrawString(titles[i], prtTitleFont, Brushes.Black, leftMargin, y);
+                    y += prtTitleFont.Height + rowOfDownDistance;
                 }
 
-                rowOfTop = y;
+                //margin
+                y += gapBetweenContentAndTitle;
                 foreach (DataRow dr in printedTable.Rows) {
                     for (i = 0; i < printedTable.Columns.Count; i++) {
                         Int32 colwidth =
-                            Convert.ToInt16(ev.Graphics.MeasureString(dr[i].ToString().Trim(), prtTextFont).Width);
+                            Convert.ToInt16(ev.Graphics.MeasureString(dr[i].ToString().Trim(), prtColumnHeaderFont).Width);
                         if (colwidth > width[i]) {
                             width[i] = colwidth;
                         }
                     }
                 }
             }
-
+            
+            y += rowOfUpDistance;
+            // 画列头
             for (i = endColumnControls; i < printedTable.Columns.Count; i++) {
                 String headtext = printedTable.Columns[i].ColumnName.Trim();
                 if (pindex == 0) {
-                    int colwidth = Convert.ToInt16(ev.Graphics.MeasureString(headtext, prtTextFont).Width);
+                    int colwidth = Convert.ToInt16(ev.Graphics.MeasureString(headtext, prtColumnHeaderFont).Width);
                     if (colwidth > width[i]) {
                         width[i] = colwidth;
                     }
                 }
 
                 //判断宽是否越界
-                if (x + width[i] > pheight) {
+                if (x + width[i] > pWidth) {
                     break;
                 }
 
-                ev.Graphics.DrawString(headtext, prtTextFont, Brushes.Black, x, y + rowOfUpDistance);
+
+                ev.Graphics.DrawString(headtext, prtColumnHeaderFont, Brushes.Black, x, y);
                 x += width[i];
+                
             }
+            y += rowOfDownDistance + prtColumnHeaderFont.Height;
+            
+            ev.Graphics.DrawLine(pen, leftMargin, y, x, y);
+            int rowOfTop = y;
 
             startColumnControls = endColumnControls;
             if (i < printedTable.Columns.Count) {
@@ -155,37 +167,35 @@ namespace Chapter12_winform.utils {
             else {
                 endColumnControls = printedTable.Columns.Count;
             }
-
-            ev.Graphics.DrawLine(pen, left, rowOfTop, x, rowOfTop);
-            y += rowOfUpDistance + prtTextFont.Height + rowOfDownDistance;
-            ev.Graphics.DrawLine(pen, left, y, x, y);
+            
             //打印数据
             for (i = curdgi; i < printedTable.Rows.Count; i++) {
-                x = left;
+                x = leftMargin;
+                y += rowOfUpDistance;
                 for (Int32 j = startColumnControls; j < endColumnControls; j++) {
-                    ev.Graphics.DrawString(printedTable.Rows[i][j].ToString().Trim(), prtTextFont, Brushes.Black, x,
-                        y + rowOfUpDistance);
+                    ev.Graphics.DrawString(printedTable.Rows[i][j].ToString().Trim(), prtDataFont, Brushes.Black, x,
+                        y);
                     x += width[j];
                 }
 
-                y += rowOfUpDistance + prtTextFont.Height + rowOfDownDistance;
-                ev.Graphics.DrawLine(pen, left, y, x, y);
+                y += prtDataFont.Height + rowOfDownDistance;
+                ev.Graphics.DrawLine(pen, leftMargin, y, x, y);
                 //判断高是否越界
-                if (y > pWidth - prtTextFont.Height - 400) //if (y > pWidth - prtTextFont.Height - 30)
+                if (y > pheight - prtDataFont.Height - 400) //if (y > pWidth - prtTextFont.Height - 30)
                 {
                     break;
                 }
             }
 
-            ev.Graphics.DrawLine(pen, left, rowOfTop, left, y);
-            x = left;
+            ev.Graphics.DrawLine(pen, leftMargin, rowOfTop, leftMargin, y);
+            x = leftMargin;
             for (Int32 k = startColumnControls; k < endColumnControls; k++) {
                 x += width[k];
                 ev.Graphics.DrawLine(pen, x, rowOfTop, x, y);
             }
 
             //判断高是否越界
-            if (y > pWidth - prtTextFont.Height - 400) //if (y > pWidth - prtTextFont.Height - 30) 
+            if (y > pheight - prtDataFont.Height - 400) //if (y > pWidth - prtTextFont.Height - 30) 
             {
                 pindex++;
                 if (0 == startColumnControls) {
